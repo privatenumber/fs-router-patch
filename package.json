@@ -1,0 +1,26 @@
+{
+  "name": "fs-router-patch",
+  "version": "1.0.0",
+  "description": "Add routing for shimming fs access",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/privatenumber/fs-router-patch.git"
+  },
+  "author": "Hiroki Osame <hiroki.osame@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/privatenumber/fs-router-patch/issues"
+  },
+  "homepage": "https://github.com/privatenumber/fs-router-patch#readme",
+  "dependencies": {
+    "path-to-regexp": "^6.1.0"
+  },
+  "devDependencies": {
+    "jest": "^25.4.0",
+    "memfs": "^3.1.2"
+  }
+}
