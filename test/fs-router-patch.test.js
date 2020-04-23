@@ -10,10 +10,9 @@ test('should patch', () => {
 	router.stat('/some-file', middleware);
 
 	fs.stat('/some-file', function (err, data) {
-		console.log({ err, data });
+		expect(middleware).toHaveBeenCalled();
 	});
 
-	expect(middleware).toHaveBeenCalled();
 });
 
 test('call multiple middleware', (cb) => {
@@ -22,13 +21,11 @@ test('call multiple middleware', (cb) => {
 
 	const fs = new Volume();
 	new fsRouterPatch(fs)
-		.stat('/:file', (req, res, next) => {
+		.stat('/:file', (req, res) => {
 			middleware1();
-			next();
 		})
-		.stat('/some-file', (req, res, next) => {
+		.stat('/some-file', (req, res) => {
 			middleware2();
-			next();
 		});
 
 	fs.stat('/some-file', function (err, data) {
@@ -45,14 +42,13 @@ test('respond early', (cb) => {
 	const fs = new Volume();
 	const router = new fsRouterPatch(fs);
 
-	router.stat('/:file', (req, res, next) => {
+	router.stat('/:file', (req, res) => {
 		middleware1();
 		res.end({ someData: 1 });
 	});
 
-	router.stat('/some-file', (req, res, next) => {
+	router.stat('/some-file', (req, res) => {
 		middleware2();
-		next();
 	});
 
 	fs.stat('/some-file', function (err, data) {
@@ -64,21 +60,45 @@ test('respond early', (cb) => {
 	});
 });
 
-test('handle error', (cb) => {
+test('handle sync error', (cb) => {
 	const middleware1 = jest.fn();
 	const middleware2 = jest.fn();
 
 	const fs = new Volume();
 	const router = new fsRouterPatch(fs);
 
-	router.stat('/:file', (req, res, next) => {
+	router.stat('/:file', (req, res) => {
 		middleware1();
 		throw new Error('some error');
 	});
 
-	router.stat('/some-file', (req, res, next) => {
+	router.stat('/some-file', (req, res) => {
 		middleware2();
-		next();
+	});
+
+	fs.stat('/some-file', function (err, data) {
+		expect(err).not.toBe(null);
+		expect(err.message).toBe('some error');
+		expect(middleware1).toHaveBeenCalled();
+		expect(middleware2).not.toHaveBeenCalled();
+		cb();
+	});
+});
+
+test('handle async error', (cb) => {
+	const middleware1 = jest.fn();
+	const middleware2 = jest.fn();
+
+	const fs = new Volume();
+	const router = new fsRouterPatch(fs);
+
+	router.stat('/:file', async (req, res) => {
+		middleware1();
+		throw new Error('some error');
+	});
+
+	router.stat('/some-file', (req, res) => {
+		middleware2();
 	});
 
 	fs.stat('/some-file', function (err, data) {
