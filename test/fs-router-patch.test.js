@@ -21,17 +21,15 @@ test('call multiple middleware', (cb) => {
 	const middleware2 = jest.fn();
 
 	const fs = new Volume();
-	const router = new fsRouterPatch(fs);
-
-	router.stat('/:file', (req, res, next) => {
-		middleware1();
-		next();
-	});
-
-	router.stat('/some-file', (req, res, next) => {
-		middleware2();
-		next();
-	});
+	new fsRouterPatch(fs)
+		.stat('/:file', (req, res, next) => {
+			middleware1();
+			next();
+		})
+		.stat('/some-file', (req, res, next) => {
+			middleware2();
+			next();
+		});
 
 	fs.stat('/some-file', function (err, data) {
 		expect(middleware1).toHaveBeenCalled();
